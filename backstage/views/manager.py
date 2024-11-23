@@ -51,10 +51,10 @@ def book():
     book_data = []
     for i in book_row:
         book = {
-            '商品編號': i[0],
-            '商品名稱': i[1],
-            '商品售價': i[2],
-            '商品類別': i[3]
+            '課程編號': i[0],
+            '課程名稱': i[1],
+            '課程售價': i[2],
+            '課程類別': i[3]
         }
         book_data.append(book)
     return book_data
@@ -81,7 +81,7 @@ def add():
 
         # 檢查欄位的長度
         if len(pname) < 1 or len(price) < 1:
-            flash('商品名稱或價格不可為空。')
+            flash('課程名稱或價格不可為空。')
             return redirect(url_for('manager.productManager'))
 
 
@@ -136,11 +136,11 @@ def show_info():
     description = data[4]
 
     product = {
-        '商品編號': pid,
-        '商品名稱': pname,
+        '課程編號': pid,
+        '課程名稱': pname,
         '單價': price,
         '類別': category,
-        '商品敘述': description
+        '課程敘述': description
     }
     return product
 
@@ -168,10 +168,66 @@ def orderManager():
         for j in orderdetail_row:
             orderdetail = {
                 '訂單編號': j[0],
-                '商品名稱': j[1],
-                '商品單價': j[2],
+                '課程名稱': j[1],
+                '課程單價': j[2],
                 '訂購數量': j[3]
             }
             order_detail.append(orderdetail)
 
     return render_template('orderManager.html', orderData = order_data, orderDetail = order_detail, user=current_user.name)
+
+
+@manager.route('/orderTracker', methods=['GET', 'POST'])
+@login_required
+def orderTracker():
+    order_data = []
+    order_detail = []
+    # 訂單被刪除
+    if 'delete' in request.values:
+        oid = request.values.get('delete')
+        data = Record.delete_check(oid)
+        print(oid)
+        if(data != None):
+            flash('failed')
+        else:
+            Order_List.delete_order(oid)
+            return redirect(url_for('manager.orderTracker'))
+    # 新增接單訓練員
+    if 'trainer_add' in request.values:
+        oid = request.values.get('trainer_add')
+        trainer = request.values.get('ename')
+        print(oid)
+        print(trainer)
+        if trainer is None or trainer.strip() == '':
+            flash('failed')
+        else:
+            Order_List.update_trainer(oid, trainer)
+            return redirect(url_for('manager.orderTracker'))
+    if request.method == 'POST':
+        pass
+    else:
+        order_row = Order_List.get_order()
+        # order_data = []
+        for i in order_row:
+            status = "已接單" if i[4] else "未接單"
+            order = {
+                '訂單編號': i[0],
+                '訂購人': i[1],
+                '訂單總價': i[2],
+                '訂單時間': i[3],
+                '接單訓練員': i[4],
+                '訂單狀態': status
+            }
+            order_data.append(order)
+        orderdetail_row = Order_List.get_orderdetail()
+        # order_detail = []
+        for j in orderdetail_row:
+            orderdetail = {
+                '訂單編號': j[0],
+                '課程名稱': j[1],
+                '課程單價': j[2],
+                '訂購數量': j[3],
+                '接單訓練員': j[4]
+            }
+            order_detail.append(orderdetail)
+    return render_template('orderTracker.html', orderData = order_data, orderDetail = order_detail, user=current_user.name)

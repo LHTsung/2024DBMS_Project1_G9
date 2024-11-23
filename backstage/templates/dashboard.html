@@ -11,8 +11,9 @@
     <nav>
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">訂單數量分析</button>
-        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">書本銷量分類</button>
-        <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">消費總額排名</button>        
+        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">銷量分類</button>
+        <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">消費總額排名</button> 
+        <button class="nav-link" id="nav-trainer-tab" data-bs-toggle="tab" data-bs-target="#nav-trainer" type="button" role="tab" aria-controls="nav-trainer" aria-selected="false">Trainer 排名</button>        
       </div>      
     </nav>
   </div>
@@ -32,6 +33,12 @@
       <center>
         <div id="mainc" class="container-fluid" style="width: 1200px;height:500px"></div>
       </center>
+    </div>
+    <div class="tab-pane fade" id="nav-trainer" role="tabpanel" aria-labelledby="nav-trainer-tab">
+      <center>
+        <div id="main-trainer" class="container-fluid" style="width: 1200px;height:500px"></div>
+      </center>
+    </div>
     </div>
   </div>
 </div>
@@ -80,8 +87,8 @@
     },
   };
 
-  // 以圓餅圖分析書本銷量
-  var chartDomb = document.getElementById('mainb');
+ // 以圓餅圖分析書本銷量
+ var chartDomb = document.getElementById('mainb');
   var myChartb = echarts.init(chartDomb);
   var data = {{datab|tojson}};
   var optionb = {
@@ -161,6 +168,68 @@
     animationEasingUpdate: 'linear'
   };
 
+  // 新增：Trainer 排名圖表
+  var chartDomTrainer = document.getElementById('main-trainer');
+    var myChartTrainer = echarts.init(chartDomTrainer);
+    var trainerNames = {{ trainer_names|tojson }};
+    var trainerCounts = {{ trainer_counts|tojson }};
+    var optionTrainer = {
+      title: {
+        text: 'Trainer 接課程數量排名'
+      },
+      xAxis: {
+        max: 'dataMax'
+      },
+      yAxis: {
+        type: 'category',
+        data: trainerNames,
+        inverse: true,
+        animationDuration: 300,
+        animationDurationUpdate: 300,
+        max: 3
+      },
+      tooltip: {},
+      series: [
+        {
+          realtimeSort: true,
+          name: '課程數量',
+          type: 'bar',
+          data: trainerCounts,
+          label: {
+            show: true,
+            position: 'right',
+            valueAnimation: true
+          }
+        }
+      ],
+      legend: {
+        show: true
+      },
+      animationDuration: 30,
+      animationDurationUpdate: 30,
+      animationEasing: 'linear',
+      animationEasingUpdate: 'linear'
+    };
+  
+// 設置圖表的初始化和更新
+myChartTrainer.setOption(optionTrainer);
+
+// 強制更新圖表以顯示正確數據（可以使用 setTimeout 保證數據加載後更新）
+setTimeout(function() {
+  myChartTrainer.setOption({
+    series: [
+      {
+        name: '課程數量',
+        type: 'bar',
+        data: trainerCounts,  // 更新數據
+      }
+    ]
+  });
+}, 100);  // 100ms後強制更新圖表，確保數據已經載入
+
+
+
+
   function run() {
     myChartc.setOption({
       series: [
@@ -183,6 +252,7 @@
   optiona && myCharta.setOption(optiona);
   optionb && myChartb.setOption(optionb);
   optionc && myChartc.setOption(optionc);
+  optionTrainer && myChartTrainer.setOption(optionTrainer);
       
 </script>
 

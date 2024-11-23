@@ -6,12 +6,13 @@ from psycopg2 import pool
 class DB:
     connection_pool = pool.SimpleConnectionPool(
         1, 100,  # 最小和最大連線數
-        user='your_account',
-        password='password',
+        user='project_9',
+        password='4arh6p',
         host='140.117.68.66',
         port='5432',
-        dbname='DB_name'
+        dbname='project_9'
     )
+
 
     @staticmethod
     def connect():
@@ -216,32 +217,49 @@ class Record:
         sql = 'SELECT SUM(total) FROM record WHERE tno = %s'
         return DB.fetchone(sql, (tno,))[0]
 
-
+#######新##########
 class Order_List:
     @staticmethod
     def add_order(input_data):
         sql = 'INSERT INTO order_list (oid, mid, ordertime, price, tno) VALUES (DEFAULT, %s, TO_TIMESTAMP(%s, %s), %s, %s)'
         DB.execute_input(sql, (input_data['mid'], input_data['ordertime'], input_data['format'], input_data['total'], input_data['tno']))
-
     @staticmethod
     def get_order():
         sql = '''
-            SELECT o.oid, m.name, o.price, o.ordertime
+            SELECT o.oid, m.name, o.price, o.ordertime, COALESCE(o.trainer, '')
             FROM order_list o
             NATURAL JOIN member m
             ORDER BY o.ordertime DESC
         '''
         return DB.fetchall(sql)
-
+    # 異動: 刪除訂單
+    @staticmethod
+    def delete_order(oid):
+        sql = 'DELETE FROM order_list WHERE oid = %s'
+        DB.execute_input(sql, (oid,))
     @staticmethod
     def get_orderdetail():
         sql = '''
-        SELECT o.oid, p.pname, r.saleprice, r.amount
+        SELECT o.oid, p.pname, r.saleprice, r.amount, o.trainer
         FROM order_list o
         JOIN record r ON o.tno = r.tno -- 確保兩者都是 bigint 類型
         JOIN product p ON r.pid = p.pid
         '''
         return DB.fetchall(sql)
+    # 異動: 檢查訓練員
+    @staticmethod
+    def assign_delivery_trainer(oid):
+        sql = '''
+            SELECT o.trainer
+            FROM order_list o
+            WHERE o.oid = %s
+        '''
+        return DB.fetchall(sql, (oid,))
+    # 異動: 新增接單訓練員
+    @staticmethod
+    def update_trainer(ename, oid):
+        sql = 'UPDATE order_list SET trainer = %s WHERE oid = %s'
+        DB.execute_input(sql, (oid, ename))
 
 
 class Analysis:
@@ -260,6 +278,8 @@ class Analysis:
         sql = 'SELECT SUM(total), category FROM product, record WHERE product.pid = record.pid GROUP BY category'
         return DB.fetchall(sql)
 
+
+
     @staticmethod
     def member_sale():
         sql = 'SELECT SUM(price), member.mid, member.name FROM order_list, member WHERE order_list.mid = member.mid AND member.identity = %s GROUP BY member.mid, member.name ORDER BY SUM(price) DESC'
@@ -269,3 +289,16 @@ class Analysis:
     def member_sale_count():
         sql = 'SELECT COUNT(*), member.mid, member.name FROM order_list, member WHERE order_list.mid = member.mid AND member.identity = %s GROUP BY member.mid, member.name ORDER BY COUNT(*) DESC'
         return DB.fetchall(sql, ('user',))
+
+    @staticmethod
+    def trainer_course_count():
+        # 查詢每個訓練員接過的課程數量
+        sql = '''
+            SELECT trainer, COUNT(DISTINCT o.oid)
+            FROM order_list o
+            WHERE o.trainer IS NOT NULL
+            GROUP BY trainer
+            ORDER BY COUNT(DISTINCT o.oid) DESC
+        '''
+        return DB.fetchall(sql)
+
