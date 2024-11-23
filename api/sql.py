@@ -169,6 +169,31 @@ class Product:
     def update_product(input_data):
         sql = 'UPDATE product SET pname = %s, price = %s, category = %s, pdesc = %s WHERE pid = %s'
         DB.execute_input(sql, (input_data['pname'], input_data['price'], input_data['category'], input_data['pdesc'], input_data['pid']))
+    
+    @staticmethod
+    def toggle_status(pid):
+        try:
+            connection = DB.connect()
+            with connection.cursor() as cursor:
+                # 取得當前狀態
+                cursor.execute("SELECT O_STATUS FROM product WHERE pid = %s", (pid,))
+                result = cursor.fetchone()
+                if result:
+                    current_status = result[0]
+                    new_status = '未接' if current_status == '已接' else '已接'
+                    
+                    # 更新狀態
+                    cursor.execute("UPDATE product SET O_STATUS = %s WHERE pid = %s", (new_status, pid))
+                    connection.commit()
+                    return new_status
+                else:
+                    return None
+        except psycopg2.Error as e:
+            print(f"Error toggling status: {e}")
+            connection.rollback()
+            return None
+        finally:
+            DB.release(connection)
 
 
 class Record:
@@ -259,7 +284,13 @@ class Order_List:
     @staticmethod
     def update_trainer(ename, oid):
         sql = 'UPDATE order_list SET trainer = %s WHERE oid = %s'
-        DB.execute_input(sql, (oid, ename))
+        DB.execute_input(sql, (ename, oid))
+
+class Trainer:
+    @staticmethod
+    def get_all_trainers():
+        sql = 'SELECT TID, TNAME FROM TRAINER'
+        return DB.fetchall(sql)
 
 
 class Analysis:
