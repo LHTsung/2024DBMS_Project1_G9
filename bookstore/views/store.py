@@ -43,9 +43,9 @@ def bookstore():
         
         for i in book_row:
             book = {
-                '商品編號': i[0],
-                '商品名稱': i[1],
-                '商品價格': i[2]
+                '課程編號': i[0],
+                '課程名稱': i[1],
+                '課程價格': i[2]
             }
             book_data.append(book)
             total = total + 1
@@ -73,12 +73,12 @@ def bookstore():
         image = 'sdg.jpg'
         
         product = {
-            '商品編號': pid,
-            '商品名稱': pname,
+            '課程編號': pid,
+            '課程名稱': pname,
             '單價': price,
             '類別': category,
-            '商品敘述': description,
-            '商品圖片': image
+            '課程敘述': description,
+            '課程圖片': image
         }
 
         return render_template('product.html', data = product, user=current_user.name)
@@ -94,9 +94,9 @@ def bookstore():
         
         for i in book_row:
             book = {
-                '商品編號': i[0],
-                '商品名稱': i[1],
-                '商品價格': i[2]
+                '課程編號': i[0],
+                '課程名稱': i[1],
+                '課程價格': i[2]
             }
             book_data.append(book)
             
@@ -120,9 +120,9 @@ def bookstore():
         
         for i in book_row:
             book = {
-                '商品編號': i[0],
-                '商品名稱': i[1],
-                '商品價格': i[2]
+                '課程編號': i[0],
+                '課程名稱': i[1],
+                '課程價格': i[2]
             }
 
             book_data.append(book)
@@ -141,9 +141,9 @@ def bookstore():
         temp = 0
         for i in book_row:
             book = {
-                '商品編號': i[0],
-                '商品名稱': i[1],
-                '商品價格': i[2],
+                '課程編號': i[0],
+                '課程名稱': i[1],
+                '課程價格': i[2],
             }
             if len(book_data) < 9:
                 book_data.append(book)
@@ -160,7 +160,7 @@ def cart():
             flash('No permission')
             return redirect(url_for('manager.home'))
 
-    # 回傳有 pid 代表要 加商品
+    # 回傳有 pid 代表要 加課程
     if request.method == 'POST':
         if "pid" in request.form:
             data = Cart.get_cart(current_user.id)
@@ -176,9 +176,9 @@ def cart():
                 flash('Product ID is missing.')
                 return redirect(url_for('bookstore.cart'))  # 返回購物車頁面並顯示錯誤信息
 
-            # 檢查購物車裡面有沒有商品
+            # 檢查購物車裡面有沒有課程
             product = Record.check_product(pid, tno)
-            # 取得商品價錢
+            # 取得課程價錢
             price = Product.get_product(pid)[2]
 
             # 如果購物車裡面沒有的話，把它加一個進去
@@ -235,9 +235,9 @@ def order():
     for i in product_row:
         pname = Product.get_name(i[1])
         product = {
-            '商品編號': i[1],
-            '商品名稱': pname,
-            '商品價格': i[3],
+            '課程編號': i[1],
+            '課程名稱': pname,
+            '課程價格': i[3],
             '數量': i[2]
         }
         product_data.append(product)
@@ -271,8 +271,8 @@ def orderlist():
     for j in orderdetail_row:
         temp = {
             '訂單編號': j[0],
-            '商品名稱': j[1],
-            '商品單價': j[2],
+            '課程名稱': j[1],
+            '課程單價': j[2],
             '訂購數量': j[3]
         }
         orderdetail.append(temp)
@@ -287,7 +287,7 @@ def change_order():
 
     for i in product_row:
         
-        # i[0]：交易編號 / i[1]：商品編號 / i[2]：數量 / i[3]：價格
+        # i[0]：交易編號 / i[1]：課程編號 / i[2]：數量 / i[3]：價格
         if int(request.form[i[1]]) != i[2]:
             Record.update_product({
                 'amount':request.form[i[1]],
@@ -318,9 +318,9 @@ def only_cart():
         amount = i[2]
 
         product = {
-            '商品編號': pid,
-            '商品名稱': pname,
-            '商品價格': price,
+            '課程編號': pid,
+            '課程名稱': pname,
+            '課程價格': price,
             '數量': amount
         }
         product_data.append(product)

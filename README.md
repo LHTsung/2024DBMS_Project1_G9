@@ -1,4 +1,4 @@
-# 中山網路書店
+# 肌肉健身房
 [![GitHub release](https://img.shields.io/github/release/Text-Analytics-and-Retrieval/db_class2023)](https://github.com/Text-Analytics-and-Retrieval/db_class2023/releases/latest)
 [![GitHub license](https://img.shields.io/github/license/Text-Analytics-and-Retrieval/db_class2023)](https://github.com/Text-Analytics-and-Retrieval/db_class2023/main/LICENSE)
 
@@ -8,8 +8,8 @@
 ## 功能
 - 提供CRUD範例，並搭配資料分析功能。
 - 以MVC架構開發。
-- 一般消費者可以瀏覽、搜尋、購買商品，並查看訂單狀態。
-- 後台管理者可以編輯商品，並檢視每筆訂單以及商品銷售圖表。
+- 一般消費者可以瀏覽、搜尋、購買課程，並查看訂單狀態。
+- 後台管理者可以編輯課程，並檢視每筆訂單以及課程銷售圖表。
 
 ## 範例
 點選以下連結體驗系統功能: https://bookstore.tarflow.com/

@@ -56,4 +56,28 @@ def dashboard():
     for i in row:
         countList.append(i[0])
         
-    return render_template('dashboard.html', counter = counter, revenue = revenue, dataa = dataa, datab = datab, datac = datac, nameList = nameList, countList = countList)
+    # 新增 Trainer 接課程數據
+    row = Analysis.trainer_course_count()
+    trainer_names = []
+    trainer_counts = []
+
+    for trainer in row:
+        for trainer in row:
+            trainer_names.append(trainer[0])  # 訓練員名字
+            trainer_counts.append(trainer[1])  # 課程數量
+        
+
+
+
+    return render_template(
+        'dashboard.html', 
+        counter=counter, 
+        revenue=revenue, 
+        dataa=dataa, 
+        datab=datab, 
+        datac=datac, 
+        nameList=nameList, 
+        countList=countList,
+        trainer_names=trainer_names,  # 新增
+        trainer_counts=trainer_counts  # 新增
+    )
