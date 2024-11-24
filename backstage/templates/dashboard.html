@@ -2,7 +2,7 @@
 {% block head %}
 {{ super() }}
 {% endblock head %}
-{% block title %}後台資料分析{% endblock title%}
+{% block title %}後台資料分析{% endblock title %}
 {% block content %}
 
 <div class="my-3 p-3 bg-body rounded shadow-sm">
@@ -12,36 +12,48 @@
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">訂單數量分析</button>
         <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">銷量分類</button>
-        <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">消費總額排名</button> 
-        <button class="nav-link" id="nav-trainer-tab" data-bs-toggle="tab" data-bs-target="#nav-trainer" type="button" role="tab" aria-controls="nav-trainer" aria-selected="false">Trainer 排名</button>        
-      </div>      
+        <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">消費總額排名</button>
+        <button class="nav-link" id="nav-trainer-tab" data-bs-toggle="tab" data-bs-target="#nav-trainer" type="button" role="tab" aria-controls="nav-trainer" aria-selected="false">授課數最多-教練排名</button>
+        <button class="nav-link" id="nav-bottom-tab" data-bs-toggle="tab" data-bs-target="#nav-bottom" type="button" role="tab" aria-controls="nav-bottom" aria-selected="false">授課數最少-教練排名</button>
+        <button class="nav-link" id="nav-best-seller-tab" data-bs-toggle="tab" data-bs-target="#nav-best-seller" type="button" role="tab" aria-controls="nav-best-seller" aria-selected="false">最暢銷課程</button>
+      </div>
     </nav>
   </div>
-  <br/>
+  <br />
   <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
-      <center> 
-        <div id="maina" class="container-fluid" style="width:1200px;height:500px"></div>
+      <center>
+        <div id="maina" class="container-fluid" style="width: 1200px; height: 500px;"></div>
       </center>
     </div>
     <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
       <center>
-        <div id="mainb" class="container-fluid" style="width: 600px;height:500px"></div>
+        <div id="mainb" class="container-fluid" style="width: 600px; height: 500px;"></div>
       </center>
     </div>
     <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
       <center>
-        <div id="mainc" class="container-fluid" style="width: 1200px;height:500px"></div>
+        <div id="mainc" class="container-fluid" style="width: 1200px; height: 500px;"></div>
       </center>
     </div>
     <div class="tab-pane fade" id="nav-trainer" role="tabpanel" aria-labelledby="nav-trainer-tab">
       <center>
-        <div id="main-trainer" class="container-fluid" style="width: 1200px;height:500px"></div>
+        <div id="main-trainer" class="container-fluid" style="width: 1200px; height: 500px;"></div>
       </center>
     </div>
+    <div class="tab-pane fade" id="nav-bottom" role="tabpanel" aria-labelledby="nav-bottom-tab">
+      <center>
+        <div id="main-trainer-bottom" class="container-fluid" style="width: 1200px; height: 500px;"></div>
+      </center>
+    </div>
+    <div class="tab-pane fade" id="nav-best-seller" role="tabpanel" aria-labelledby="nav-best-seller-tab">
+      <center>
+        <div id="main-best-seller" class="container-fluid" style="width: 1200px; height: 500px;"></div>
+      </center>
     </div>
   </div>
 </div>
+
 
 <script>
   // 以長條圖與折線圖分析各月訂單
@@ -168,66 +180,192 @@
     animationEasingUpdate: 'linear'
   };
 
-  // 新增：Trainer 排名圖表
-  var chartDomTrainer = document.getElementById('main-trainer');
-    var myChartTrainer = echarts.init(chartDomTrainer);
-    var trainerNames = {{ trainer_names|tojson }};
-    var trainerCounts = {{ trainer_counts|tojson }};
-    var optionTrainer = {
-      title: {
-        text: 'Trainer 接課程數量排名'
-      },
-      xAxis: {
+// Trainer 接課最多排名圖表
+var chartDomTrainer = document.getElementById('main-trainer');
+var myChartTrainer = echarts.init(chartDomTrainer);
+
+var trainerNames = {{ trainer_names|tojson }}; // 從後端傳來的 Trainer 名稱（最多）
+var trainerCounts = {{ trainer_counts|tojson }}; // 從後端傳來的 Trainer 課程數量（最多）
+
+var optionTrainer = {
+  title: {
+    text: '授課數最多'
+  },
+  xAxis: {
+    max: 'dataMax'
+  },
+  yAxis: {
+    type: 'category',
+    data: trainerNames,
+    inverse: true,
+    animationDuration: 300,
+    animationDurationUpdate: 300,
+    max: 3
+  },
+  tooltip: {},
+  series: [
+    {
+      realtimeSort: true,
+      name: '課程數量',
+      type: 'bar',
+      data: trainerCounts,
+      label: {
+        show: true,
+        position: 'right',
+        valueAnimation: true
+      }
+    }
+  ],
+  legend: {
+    show: true
+  },
+  animationDuration: 30,
+  animationDurationUpdate: 30,
+  animationEasing: 'linear',
+  animationEasingUpdate: 'linear'
+};
+
+// 設置圖表
+myChartTrainer.setOption(optionTrainer);
+
+
+
+
+// 墊底排名圖表
+var chartDomTrainerLess = document.getElementById('main-trainer-bottom'); // 注意不同的容器 ID
+var myChartTrainerLess = echarts.init(chartDomTrainerLess);
+
+var trainerNamesBottom = {{ trainer_names_bottom|tojson }}; // 從後端傳來的 Trainer 名稱（最少）
+var trainerCountsBottom = {{ trainer_counts_bottom|tojson }}; // 從後端傳來的 Trainer 課程數量（最少）
+
+var optionTrainerLess = {
+  title: {
+    text: '授課數最多'
+  },
+  xAxis: {
+    max: 'dataMax'
+  },
+  yAxis: {
+    type: 'category',
+    data: trainerNamesBottom,
+    inverse: true,
+    animationDuration: 300,
+    animationDurationUpdate: 300,
+    max: 3
+  },
+  tooltip: {},
+  series: [
+    {
+      realtimeSort: true,
+      name: '接課數量',
+      type: 'bar',
+      data: trainerCountsBottom,
+      label: {
+        show: true,
+        position: 'right',
+        valueAnimation: true
+      }
+    }
+  ],
+  legend: {
+    show: true
+  },
+  animationDuration: 30,
+  animationDurationUpdate: 30,
+  animationEasing: 'linear',
+  animationEasingUpdate: 'linear'
+};
+
+// 設置圖表
+myChartTrainerLess.setOption(optionTrainerLess);
+
+// 最暢銷課程（按課程數量）圖表
+var chartDomBestSeller = document.getElementById('main-best-seller');
+var myChartBestSeller = echarts.init(chartDomBestSeller); // 設置大小
+
+// 從後端傳來的最暢銷課程資料
+var courseNames = {{ course_names | tojson }};
+var courseCounts = {{ course_counts | tojson }};
+
+var optionBestSeller = {
+    title: {
+        text: '最暢銷課程（按課程數量）'
+    },
+    xAxis: {
         max: 'dataMax'
-      },
-      yAxis: {
+    },
+    yAxis: {
         type: 'category',
-        data: trainerNames,
+        data: courseNames,
         inverse: true,
         animationDuration: 300,
         animationDurationUpdate: 300,
-        max: 3
-      },
-      tooltip: {},
-      series: [
-        {
-          realtimeSort: true,
-          name: '課程數量',
-          type: 'bar',
-          data: trainerCounts,
-          label: {
+        max: 3,
+        axisLabel: {
+            // 讓標籤文字自動換行
             show: true,
-            position: 'right',
-            valueAnimation: true
-          }
+            interval: 0,  // 顯示所有標籤
+            rotate: 30,    // 旋轉角度，根據需要調整
+            formatter: function (value) {
+                // 如果課程名稱太長，可以將名稱分成多行顯示
+                return value.length > 10 ? value.substring(0, 10) + '...' : value;
+            }
         }
-      ],
-      legend: {
+    },
+    tooltip: {},
+    series: [
+        {
+            realtimeSort: true,
+            name: '課程數量',
+            type: 'bar',
+            data: courseCounts,
+            label: {
+                show: true,
+                position: 'right',
+                valueAnimation: true
+            }
+        }
+    ],
+    legend: {
         show: true
-      },
-      animationDuration: 30,
-      animationDurationUpdate: 30,
-      animationEasing: 'linear',
-      animationEasingUpdate: 'linear'
-    };
-  
-// 設置圖表的初始化和更新
-myChartTrainer.setOption(optionTrainer);
+    },
+    animationDuration: 30,
+    animationDurationUpdate: 30,
+    animationEasing: 'linear',
+    animationEasingUpdate: 'linear'
+};
 
-// 強制更新圖表以顯示正確數據（可以使用 setTimeout 保證數據加載後更新）
-setTimeout(function() {
+// 設置圖表
+myChartBestSeller.setOption(optionBestSeller);
+
+
+
+
+// 使用 setTimeout 確保數據加載後再次更新（如果需要）
+setTimeout(function () {
   myChartTrainer.setOption({
     series: [
       {
-        name: '課程數量',
-        type: 'bar',
-        data: trainerCounts,  // 更新數據
+        data: trainerCounts // 確保最多數據更新
       }
     ]
   });
-}, 100);  // 100ms後強制更新圖表，確保數據已經載入
-
-
+  
+  myChartBestSeller.setOption({
+    series: [
+      {
+        data: courseCounts // 確保最多數據更新
+      }
+    ]
+  });
+  myChartTrainerLess.setOption({
+    series: [
+      {
+        data: trainerCountsBottom // 確保最少數據更新
+      }
+    ]
+  });
+}, 100);
 
 
   function run() {

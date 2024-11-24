@@ -265,3 +265,5 @@ def toggle_status():
         flash('無效的課程編號')
     
     return redirect(url_for('manager.productManager'))
+
+

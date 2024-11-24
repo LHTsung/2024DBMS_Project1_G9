@@ -195,6 +195,11 @@ class Product:
         finally:
             DB.release(connection)
 
+    from api.sql import DB  # 假設你的 DB 模組中有這個連接
+
+
+
+
 
 class Record:
     @staticmethod
@@ -246,8 +251,18 @@ class Record:
 class Order_List:
     @staticmethod
     def add_order(input_data):
-        sql = 'INSERT INTO order_list (oid, mid, ordertime, price, tno) VALUES (DEFAULT, %s, TO_TIMESTAMP(%s, %s), %s, %s)'
-        DB.execute_input(sql, (input_data['mid'], input_data['ordertime'], input_data['format'], input_data['total'], input_data['tno']))
+        sql = '''
+            INSERT INTO order_list (mid, ordertime, price, tno) 
+            VALUES (%s, TO_TIMESTAMP(%s, %s), %s, %s)
+        '''
+        DB.execute_input(sql, (
+            input_data['mid'],               # 會員 ID
+            input_data['ordertime'],         # 訂單時間
+            input_data['format'],            # 時間格式
+            input_data['total'],             # 總金額
+            input_data['tno']                # 交易號
+        ))
+
     @staticmethod
     def get_order():
         sql = '''
@@ -293,6 +308,7 @@ class Trainer:
         return DB.fetchall(sql)
 
 
+
 class Analysis:
     @staticmethod
     def month_price(i):
@@ -323,13 +339,39 @@ class Analysis:
 
     @staticmethod
     def trainer_course_count():
-        # 查詢每個訓練員接過的課程數量
+        # 查詢每個訓練員接過的課程數量，並顯示訓練員的名稱
         sql = '''
-            SELECT trainer, COUNT(DISTINCT o.oid)
+            SELECT t.TNAME AS trainer_name, COUNT(DISTINCT o.OID) AS course_count
             FROM order_list o
+            JOIN trainer t ON o.trainer = t.TID
             WHERE o.trainer IS NOT NULL
-            GROUP BY trainer
-            ORDER BY COUNT(DISTINCT o.oid) DESC
+            GROUP BY t.TNAME
+            ORDER BY course_count DESC
         '''
         return DB.fetchall(sql)
 
+    @staticmethod
+    def trainer_course_count_bottom():
+        # 查詢每個訓練員接過的課程數量，並返回接課數量墊底的前三名，顯示訓練員名稱
+        sql = '''
+            SELECT t.TNAME AS trainer_name, COUNT(DISTINCT o.OID) AS course_count
+            FROM order_list o
+            JOIN trainer t ON o.trainer = t.TID
+            WHERE o.trainer IS NOT NULL
+            GROUP BY t.TNAME
+            ORDER BY course_count ASC
+            LIMIT 3
+        '''
+        return DB.fetchall(sql)
+
+    @staticmethod
+    def get_best_selling_courses_by_count():
+        sql = """
+        SELECT p.PNAME, COUNT(r.PID) AS course_count
+        FROM RECORD r
+        JOIN PRODUCT p ON r.PID = p.PID
+        GROUP BY p.PNAME
+        ORDER BY course_count DESC
+        LIMIT 3;
+        """
+        return DB.fetchall(sql)

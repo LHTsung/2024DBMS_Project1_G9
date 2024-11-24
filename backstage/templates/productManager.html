@@ -79,9 +79,9 @@
                         <label for="inputProductCategory" class="form-label">課程種類</label>
                         <select id="inputProductCategory" class="form-select" name="category" required>
                             <option selected disabled value="">請選擇類型</option>
-                            <option value="BOOK">BOOK</option>
-                            <option value="CD">CD</option>
-                            <option value="DVD">DVD</option>
+                            <option value="Strength Training">Strength Training</option>
+                            <option value="Flexibility & Balance">Flexibility & Balance</option>
+                            <option value="Cardio">Cardio</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -114,31 +114,21 @@
             <th width="20%"><center>課程名稱</center></th>
             <th width="15%"><center>課程單價</center></th>
             <th width="15%"><center>課程類別</center></th>
-            <th width="10%"><center>狀態</center></th> <!-- 新增狀態欄 -->
-            <th colspan="3"><center>資料操作</center></th> <!-- 調整 colspan 為 3 -->
+            <th colspan="2"><center>資料操作</center></th>
         </tr>
     </thead>
     <tbody id="product">
-        {% for i in book_data %}
-            <tr>
-                <td><center>{{ i.課程編號 }}</center></td>
-                <td><center>{{ i.課程名稱 }}</center></td>
-                <td><center>{{ i.課程售價 }}</center></td>
-                <td><center>{{ i.課程類別 }}</center></td>
-                <td><center>{{ '已接' if i.O_STATUS == '已接' else '未接' }}</center></td> <!-- 更新狀態顯示 -->
-                <td><center>
-                    <form method="post" action="{{ url_for('manager.toggle_status') }}">
-                        <input type="hidden" name="product_id" value="{{ i.課程編號 }}">
-                        <button type="submit" class="btn btn-primary">
-                            {{ '取消' if i.O_STATUS == '已接' else '承接' }}
-                        </button>
-                    </form>
-                </center></td> <!-- 更新承接/取消按鈕 -->
-                <td><center><button type="submit" value="{{i.課程編號}}" name="edit" class="btn btn-success">編輯課程</button></center></td>
-                <td><center><button type="submit" value="{{i.課程編號}}" name="delete" onclick="return (confirm('你確定要刪除 \'{{ i.課程名稱 }}\' 嗎？'))" class="btn btn-danger">刪除課程</button></center></td>
-            </tr>
-        {% endfor %}
-        </tbody>
+    {% for i in book_data %}
+        <tr>
+            <td><center>{{ i.課程編號 }}</center></td>
+            <td><center>{{ i.課程名稱 }}</center></td>
+            <td><center>{{ i.課程售價 }}</center></td>
+            <td><center>{{ i.課程類別 }}</center></td>
+            <td><center><button type="submit" value="{{i.課程編號}}" name="edit" class="btn btn-success">編輯課程</button></center></td>
+            <td><center><button type="submit" value="{{i.課程編號}}" name="delete" onclick="return (confirm('你確定要刪除 \'{{ i.課程名稱 }}\' 嗎？'))" class="btn btn-danger">刪除課程</button></center></td>
+        </tr>
+    {% endfor %}
+    </tbody>
     
 </table>
 </form>
