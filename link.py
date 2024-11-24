@@ -1,11 +1,12 @@
 import psycopg2
 
 connection = psycopg2.connect(
-    user='your_account',
-    password='password',
+    user='project_9',
+    password='4arh6p',
     host='140.117.68.66',
     port='5432',
-    dbname='DB_name'  # PostgreSQL 的資料庫名稱
+    dbname='project_9'
 )
+
 cursor = connection.cursor()
 
