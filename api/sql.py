@@ -169,6 +169,36 @@ class Product:
     def update_product(input_data):
         sql = 'UPDATE product SET pname = %s, price = %s, category = %s, pdesc = %s WHERE pid = %s'
         DB.execute_input(sql, (input_data['pname'], input_data['price'], input_data['category'], input_data['pdesc'], input_data['pid']))
+    
+    @staticmethod
+    def toggle_status(pid):
+        try:
+            connection = DB.connect()
+            with connection.cursor() as cursor:
+                # 取得當前狀態
+                cursor.execute("SELECT O_STATUS FROM product WHERE pid = %s", (pid,))
+                result = cursor.fetchone()
+                if result:
+                    current_status = result[0]
+                    new_status = '未接' if current_status == '已接' else '已接'
+                    
+                    # 更新狀態
+                    cursor.execute("UPDATE product SET O_STATUS = %s WHERE pid = %s", (new_status, pid))
+                    connection.commit()
+                    return new_status
+                else:
+                    return None
+        except psycopg2.Error as e:
+            print(f"Error toggling status: {e}")
+            connection.rollback()
+            return None
+        finally:
+            DB.release(connection)
+
+    from api.sql import DB  # 假設你的 DB 模組中有這個連接
+
+
+
 
 
 class Record:
@@ -221,8 +251,18 @@ class Record:
 class Order_List:
     @staticmethod
     def add_order(input_data):
-        sql = 'INSERT INTO order_list (oid, mid, ordertime, price, tno) VALUES (DEFAULT, %s, TO_TIMESTAMP(%s, %s), %s, %s)'
-        DB.execute_input(sql, (input_data['mid'], input_data['ordertime'], input_data['format'], input_data['total'], input_data['tno']))
+        sql = '''
+            INSERT INTO order_list (mid, ordertime, price, tno) 
+            VALUES (%s, TO_TIMESTAMP(%s, %s), %s, %s)
+        '''
+        DB.execute_input(sql, (
+            input_data['mid'],               # 會員 ID
+            input_data['ordertime'],         # 訂單時間
+            input_data['format'],            # 時間格式
+            input_data['total'],             # 總金額
+            input_data['tno']                # 交易號
+        ))
+
     @staticmethod
     def get_order():
         sql = '''
@@ -259,7 +299,14 @@ class Order_List:
     @staticmethod
     def update_trainer(ename, oid):
         sql = 'UPDATE order_list SET trainer = %s WHERE oid = %s'
-        DB.execute_input(sql, (oid, ename))
+        DB.execute_input(sql, (ename, oid))
+
+class Trainer:
+    @staticmethod
+    def get_all_trainers():
+        sql = 'SELECT TID, TNAME FROM TRAINER'
+        return DB.fetchall(sql)
+
 
 
 class Analysis:
@@ -292,13 +339,39 @@ class Analysis:
 
     @staticmethod
     def trainer_course_count():
-        # 查詢每個訓練員接過的課程數量
+        # 查詢每個訓練員接過的課程數量，並顯示訓練員的名稱
         sql = '''
-            SELECT trainer, COUNT(DISTINCT o.oid)
+            SELECT t.TNAME AS trainer_name, COUNT(DISTINCT o.OID) AS course_count
             FROM order_list o
+            JOIN trainer t ON o.trainer = t.TID
             WHERE o.trainer IS NOT NULL
-            GROUP BY trainer
-            ORDER BY COUNT(DISTINCT o.oid) DESC
+            GROUP BY t.TNAME
+            ORDER BY course_count DESC
         '''
         return DB.fetchall(sql)
 
+    @staticmethod
+    def trainer_course_count_bottom():
+        # 查詢每個訓練員接過的課程數量，並返回接課數量墊底的前三名，顯示訓練員名稱
+        sql = '''
+            SELECT t.TNAME AS trainer_name, COUNT(DISTINCT o.OID) AS course_count
+            FROM order_list o
+            JOIN trainer t ON o.trainer = t.TID
+            WHERE o.trainer IS NOT NULL
+            GROUP BY t.TNAME
+            ORDER BY course_count ASC
+            LIMIT 3
+        '''
+        return DB.fetchall(sql)
+
+    @staticmethod
+    def get_best_selling_courses_by_count():
+        sql = """
+        SELECT p.PNAME, COUNT(r.PID) AS course_count
+        FROM RECORD r
+        JOIN PRODUCT p ON r.PID = p.PID
+        GROUP BY p.PNAME
+        ORDER BY course_count DESC
+        LIMIT 3;
+        """
+        return DB.fetchall(sql)

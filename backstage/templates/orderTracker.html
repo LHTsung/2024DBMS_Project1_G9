@@ -1,0 +1,97 @@
+{% extends "backstage.html" %}
+{% block head %}
+{{ super() }}
+<!-- 如有需要，可在此添加額外的CSS或JavaScript -->
+{% endblock head %}
+
+{% block title %} 訂單追蹤 {% endblock title %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+&nbsp;
+&nbsp;
+<div class="d-flex justify-content-between container-xxl">
+    <div class="d-flex col-sm-4">
+        <span class="input-group-text" id="basic-addon1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+          </svg>
+        </span>
+        <input class="form-control me-2" id="keyword" placeholder="搜尋訂單" aria-label="Search">
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $("#keyword").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#orderTable tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+
+<br/>
+
+<div class="container-xxl">
+    <table id="orderTable" class="table table-bordered">
+        <thead>
+            <tr>
+                <th width="10%"><center>訂單編號</center></th>
+                <th width="20%"><center>訂購人</center></th>
+                <th width="15%"><center>訂單總價</center></th>
+                <th width="15%"><center>訂單時間</center></th>
+                <th width="10%"><center>接單訓練員</center></th>
+                <th width="10%"><center>訂單狀態</center></th>
+                <th width="20%"><center>操作</center></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for order in orderData %}
+            <tr>
+                <td><center>{{ order.訂單編號 }}</center></td>
+                <td><center>{{ order.訂購人 }}</center></td>
+                <td><center>{{ order.訂單總價 }}</center></td>
+                <td><center>{{ order.訂單時間 }}</center></td>
+                <td><center>{{ order.接單訓練員 }}</center></td>
+                <td><center>{{ order.訂單狀態 }}</center></td>
+                <td><center>
+                    {% if order.訂單狀態 == '未接單' %}
+                        <form method="post" action="{{ url_for('manager.orderTracker') }}">
+                            <input type="hidden" name="oid" value="{{ order.訂單編號 }}">
+                            <div class="input-group">
+                                <select name="ename" class="form-select" required>
+                                    <option value="" disabled selected>選擇訓練員</option>
+                                    {% for trainer in trainers %}
+                                        <option value="{{ trainer[0] }}">{{ trainer[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="承接" class="btn btn-primary">承接</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ url_for('manager.orderTracker') }}">
+                            <input type="hidden" name="oid" value="{{ order.訂單編號 }}">
+                            <button type="submit" name="action" value="取消" class="btn btn-danger">取消</button>
+                        </form>
+                    {% endif %}
+                </center></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock content %}

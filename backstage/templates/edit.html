@@ -1,13 +1,11 @@
 {% extends "backstage.html" %}
 {% block head %}
 {{ super() }}
-
 {% endblock head %}
 
 {% block title %}BookStore{% endblock title%}
 
 {% block content%}
-
 
 <br/>
 <div class="container-xl">
@@ -30,21 +28,21 @@
         <th>類別</th>
         <td>
           <select class="form-control" name="category">
-            {% if data.類別 == 'CD' %}
-              <option value="BOOK">BOOK</option>
-              <option value="DVD">DVD</option>
-              <option value="CD" selected>CD</option>
-            {% elif data.類別 == 'DVD' %}
-              <option value="BOOK">BOOK</option>
-              <option value="DVD" selected>DVD</option>
-              <option value="CD">CD</option>
+            {% if data.類別 == 'Strength Training' %}
+              <option value="Strength Training" selected>Strength Training</option>
+              <option value="Flexibility & Balance">Flexibility & Balance</option>
+              <option value="Cardio">Cardio</option>
+            {% elif data.類別 == 'Flexibility & Balance' %}
+              <option value="Strength Training">Strength Training</option>
+              <option value="Flexibility & Balance" selected>Flexibility & Balance</option>
+              <option value="Cardio">Cardio</option>
             {% else %}
-              <option value="BOOK" selected>BOOK</option>
-              <option value="DVD">DVD</option>
-              <option value="CD">CD</option>
+              <option value="Strength Training">Strength Training</option>
+              <option value="Flexibility & Balance">Flexibility & Balance</option>
+              <option value="Cardio" selected>Cardio</option>
             {% endif %}
-            
-        </select>
+          </select>
+        </td>
       </tr>
       <tr>
         <th>課程敘述</th>
@@ -62,13 +60,10 @@
     <center>
       <div class="option">
         <button class="btn btn-outline-success" type="submit">確定修改</button> 
-        <a href="{{ url_for('manager.productManager') }}"><button class="btn btn-outline-danger">回課程管理</button></a>
+        <a href="{{ url_for('manager.productManager') }}"><button class="btn btn-outline-danger" type="button">回課程管理</button></a>
       </div>
     </center>
-
   </form>
 </div>
-
-
 
 {% endblock content%}

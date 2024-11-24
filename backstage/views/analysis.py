@@ -62,10 +62,35 @@ def dashboard():
     trainer_counts = []
 
     for trainer in row:
-        for trainer in row:
-            trainer_names.append(trainer[0])  # 訓練員名字
-            trainer_counts.append(trainer[1])  # 課程數量
-        
+        trainer_names.append(trainer[0])  # 訓練員名字
+        trainer_counts.append(trainer[1])  # 課程數量
+
+    
+    
+    bottom_row = Analysis.trainer_course_count_bottom()
+    trainer_names_bottom = []
+    trainer_counts_bottom = []
+
+    for trainer in bottom_row:
+        trainer_names_bottom.append(trainer[0])  # 訓練員名字
+        trainer_counts_bottom.append(trainer[1])  # 接課數量
+
+
+
+    # 從 Analysis 類別調用靜態方法
+    best_selling_courses_by_count = Analysis.get_best_selling_courses_by_count()
+    # 確保數據不為 None 或空列表
+    course_names = []
+    course_counts = []
+
+    if best_selling_courses_by_count:
+        for course in best_selling_courses_by_count:
+            course_names.append(course[0])  # 課程 ID 或名稱
+            course_counts.append(course[1])  # 銷售次數
+    else:
+        course_names = ['No data available']
+        course_counts = [0]
+
 
 
 
@@ -79,5 +104,9 @@ def dashboard():
         nameList=nameList, 
         countList=countList,
         trainer_names=trainer_names,  # 新增
-        trainer_counts=trainer_counts  # 新增
+        trainer_counts=trainer_counts,
+        trainer_names_bottom=trainer_names_bottom,
+        trainer_counts_bottom=trainer_counts_bottom,
+        course_names=course_names,  # 新增
+        course_counts=course_counts  # 新增
     )
