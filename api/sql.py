@@ -326,20 +326,14 @@ class Trainer:
         return DB.fetchone(sql, (tid,))
 
     @staticmethod
-    def add_trainer(input_data):
-        # 新增訓練員
+    def add_trainer(data):
         sql = 'INSERT INTO TRAINER (TID, TNAME, SPECIALTY) VALUES (%s, %s, %s)'
-        DB.execute_input(sql, (
-            input_data['tid'], input_data['tname'], input_data['specialty']
-        ))
+        DB.execute_input(sql, (data['tid'], data['tname'], data['specialty']))
 
     @staticmethod
-    def update_trainer(input_data):
-        # 確保傳遞的資料是正確的
+    def update_trainer(data):
         sql = 'UPDATE TRAINER SET TNAME = %s, SPECIALTY = %s WHERE TID = %s'
-        DB.execute_input(sql, (
-            input_data['tname'], input_data['specialty'], input_data['tid']
-        ))
+        DB.execute_input(sql, (data['tname'], data['specialty'], data['tid']))
 
 
     @staticmethod
@@ -350,11 +344,12 @@ class Trainer:
 
         # 如果有訂單引用該 trainer，則不允許刪除
         if result[0] > 0:
-            raise Exception(f"無法刪除訓練員 {tid}，因為仍有相關訂單存在。")
-        
+            return False  # 無法刪除
+
         # 如果沒有相關訂單，則刪除該 trainer
         sql_delete = 'DELETE FROM TRAINER WHERE TID = %s'
         DB.execute_input(sql_delete, (tid,))
+        return True
 
 
 

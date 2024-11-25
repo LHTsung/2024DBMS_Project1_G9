@@ -5,6 +5,7 @@ from api.sql import *
 import imp, random, os, string
 from werkzeug.utils import secure_filename
 from flask import current_app
+from psycopg2.errors import UniqueViolation
 
 UPLOAD_FOLDER = 'static/product'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -272,53 +273,25 @@ def trainerManager():
         flash('No permission')
         return redirect(url_for('index'))
 
-    # 處理表單提交
     if request.method == 'POST':
-        action = request.form.get('action')
-        tid = request.form.get('tid')  # 確保能夠獲取 tid
-        tname = request.form.get('tname')
-        specialty = request.form.get('specialty')
-
-        if not tid:
-            flash("訓練員ID未正確提供")
+        if 'delete' in request.form:
+            tid = request.form.get('delete')
+            # 嘗試刪除訓練員
+            success = Trainer.delete_trainer(tid)
+            if success:
+                flash('success')
+            else:
+                flash('failed')
             return redirect(url_for('manager.trainerManager'))
 
-        if action == 'add':
-            # 新增邏輯
-            input_data = {
-                'tid': tid,
-                'tname': tname,
-                'specialty': specialty
-            }
-            Trainer.add_trainer(input_data)
-            flash('訓練員已成功新增')
-
-        elif action == 'update':
-            # 更新訓練員資料
-            input_data = {
-                'tid': tid,
-                'tname': tname,
-                'specialty': specialty
-            }
-            Trainer.update_trainer(input_data)
-            flash('訓練員資料已更新')
-
-        elif action == 'delete':
-            # 刪除邏輯
-            Trainer.delete_trainer(tid)
-            flash('訓練員已刪除')
-
-        return redirect(url_for('manager.trainerManager'))
-
-    # 搜索功能：處理 GET 請求，根據 search 關鍵字過濾訓練員
-    search_query = request.args.get('search', '')
-    if search_query:
-        trainer_data = Trainer.get_trainers_by_search(search_query)
+    # 處理 GET 請求
+    search = request.args.get('search', '')
+    if search:
+        trainer_data = Trainer.search_trainers(search)
     else:
         trainer_data = Trainer.get_all_trainers()
 
     return render_template('trainerManager.html', trainer_data=trainer_data, user=current_user.name)
-
 
 @manager.route('/addTrainer', methods=['GET', 'POST'])
 @login_required
@@ -328,19 +301,27 @@ def addTrainer():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        tid = request.form['tid']
-        tname = request.form['tname']
-        specialty = request.form['specialty']
-
-        # 新增訓練員資料
-        input_data = {
+        tid = request.form.get('tid')
+        tname = request.form.get('tname')
+        specialty = request.form.get('specialty')
+        
+        data = {
             'tid': tid,
             'tname': tname,
             'specialty': specialty
         }
-        Trainer.add_trainer(input_data)
-        flash('訓練員已成功新增')
-        return redirect(url_for('manager.trainerManager'))
+
+        try:
+            Trainer.add_trainer(data)
+            flash('success_add')  # 成功新增訓練員
+            return redirect(url_for('manager.trainerManager'))
+        except UniqueViolation:
+            flash('duplicate_tid')  # 重複的訓練員編號
+            return redirect(url_for('manager.addTrainer'))
+        except Exception as e:
+            print(e)  # 供開發時調試使用
+            flash('failed_add')  # 其他新增失敗
+            return redirect(url_for('manager.addTrainer'))
 
     return render_template('addTrainer.html')
 
@@ -373,30 +354,7 @@ def editTrainer(tid):
         return redirect(url_for('manager.trainerManager'))
 
     return render_template('editTrainer.html', trainer=trainer)
-
-
-@manager.route('/deleteTrainer/<tid>', methods=['GET', 'POST'])
-@login_required
-def deleteTrainer(tid):
-    if current_user.role == 'user':
-        flash('No permission')
-        return redirect(url_for('index'))
-
-    # 獲取訓練員資料
-    trainer = Trainer.get_trainer(tid)
-    if not trainer:
-        flash("訓練員不存在")
-        return redirect(url_for('manager.trainerManager'))
-
-    if request.method == 'POST':
-        # 刪除訓練員
-        Trainer.delete_trainer(tid)
-        flash('訓練員已刪除')
-        return redirect(url_for('manager.trainerManager'))
-
-    return render_template('deleteTrainer.html', trainer=trainer)
-    
-    
+        
 @manager.route('/dashboard', methods=['GET', 'POST'])
 @login_required  # 確保用戶已登入
 def dashboard():

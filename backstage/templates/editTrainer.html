@@ -1,20 +1,36 @@
 {% extends "backstage.html" %}
+{% block head %}
+{{ super() }}
+{% endblock head %}
 
-{% block content %}
-<h2>編輯訓練員</h2>
+{% block title %}編輯訓練員{% endblock title%}
 
-<form method="POST">
-    <input type="hidden" name="tid" value="{{ trainer[0] }}">
-    <div class="mb-3">
-        <label for="tname" class="form-label">名稱</label>
-        <input type="text" name="tname" class="form-control" value="{{ trainer[1] }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="specialty" class="form-label">專業領域</label>
-        <input type="text" name="specialty" class="form-control" value="{{ trainer[2] }}" required>
-    </div>
-    <button type="submit" name="action" value="update" class="btn btn-success">更新</button>
-    <a href="{{ url_for('manager.trainerManager') }}" class="btn btn-secondary">取消</a>
-</form>
+{% block content%}
 
-{% endblock %}
+<br/>
+<div class="container-xl">
+  <form method="post" action="{{ url_for('manager.editTrainer', tid=trainer[0]) }}">
+    <table class="table table-bordered">
+      <tr>
+        <th>訓練員編號</th>
+        <td><input class="form-control" type="text" value="{{ trainer[0] }}" name="tid" readonly></td>
+      </tr>
+      <tr>
+        <th>名稱</th>
+        <td><input class="form-control" type="text" value="{{ trainer[1] }}" name="tname" required></td>
+      </tr>
+      <tr>
+        <th>專業領域</th>
+        <td><input class="form-control" type="text" value="{{ trainer[2] }}" name="specialty" required></td>
+      </tr>
+    </table>
+    <center>
+      <div class="option">
+        <button class="btn btn-outline-success" type="submit">確定修改</button> 
+        <a href="{{ url_for('manager.trainerManager') }}" class="btn btn-outline-danger">回訓練員管理</a>
+      </div>
+    </center>
+  </form>
+</div>
+
+{% endblock content%}
