@@ -302,10 +302,51 @@ class Order_List:
         DB.execute_input(sql, (ename, oid))
 
 class Trainer:
+    # @staticmethod
+    # def get_all_trainers():
+    #     sql = 'SELECT TID, TNAME FROM TRAINER'
+    #     return DB.fetchall(sql)
+
     @staticmethod
     def get_all_trainers():
-        sql = 'SELECT TID, TNAME FROM TRAINER'
+        # 返回所有訓練員的資料
+        sql = 'SELECT TID, TNAME, SPECIALTY FROM TRAINER'
         return DB.fetchall(sql)
+
+    @staticmethod
+    def get_trainers_by_search(search_query):
+        # 根據訓練員編號或名稱搜尋
+        sql = 'SELECT TID, TNAME, SPECIALTY FROM TRAINER WHERE TID LIKE %s OR TNAME LIKE %s'
+        return DB.fetchall(sql, (f'%{search_query}%', f'%{search_query}%'))
+
+    @staticmethod
+    def get_trainer(tid):
+        # 根據訓練員 ID 獲取單個訓練員資料
+        sql = 'SELECT TID, TNAME, SPECIALTY FROM TRAINER WHERE TID = %s'
+        return DB.fetchone(sql, (tid,))
+
+    @staticmethod
+    def add_trainer(input_data):
+        # 新增訓練員
+        sql = 'INSERT INTO TRAINER (TID, TNAME, SPECIALTY) VALUES (%s, %s, %s)'
+        DB.execute_input(sql, (
+            input_data['tid'], input_data['tname'], input_data['specialty']
+        ))
+
+    @staticmethod
+    def update_trainer(input_data):
+        # 確保傳遞的資料是正確的
+        sql = 'UPDATE TRAINER SET TNAME = %s, SPECIALTY = %s WHERE TID = %s'
+        DB.execute_input(sql, (
+            input_data['tname'], input_data['specialty'], input_data['tid']
+        ))
+
+
+    @staticmethod
+    def delete_trainer(tid):
+        # 刪除訓練員
+        sql = 'DELETE FROM TRAINER WHERE TID = %s'
+        DB.execute_input(sql, (tid,))
 
 
 

@@ -1,0 +1,48 @@
+{% extends "backstage.html" %}
+
+{% block content %}
+<h2>訓練員管理</h2>
+
+<!-- 搜索表單 -->
+<form method="GET" class="mb-3">
+    <input type="text" name="search" placeholder="搜尋訓練員" class="form-control" style="width: 300px;" value="{{ request.args.get('search') }}">
+    <button type="submit" class="btn btn-primary mt-2">搜尋</button>
+</form>
+
+<!-- 訓練員列表 -->
+<div class="container-xxl position-relative">
+    <!-- 新增訓練員按鈕，放置在右上角 -->
+    <a href="{{ url_for('manager.addTrainer') }}" class="btn btn-outline-success position-absolute" style="top: 10px; right: 10px;">新增訓練員</a>
+
+    <form method="post" action="{{ url_for('manager.trainerManager') }}">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="10%"><center>訓練員編號</center></th>
+                    <th width="20%"><center>名稱</center></th>
+                    <th width="15%"><center>專業領域</center></th>
+                    <th colspan="2"><center>資料操作</center></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trainer in trainer_data %}
+                <tr>
+                    <td><center>{{ trainer[0] }}</center></td>
+                    <td><center>{{ trainer[1] }}</center></td>
+                    <td><center>{{ trainer[2] }}</center></td>
+                    <td><center>
+                        <!-- 編輯按鈕，跳轉到編輯頁面，綠色按鈕 -->
+                        <a href="{{ url_for('manager.editTrainer', tid=trainer[0]) }}" class="btn btn-success btn-sm">編輯訓練員</a>
+                    </center></td>
+                    <td><center>
+                        <!-- 刪除按鈕，跳轉到刪除頁面 -->
+                        <a href="{{ url_for('manager.deleteTrainer', tid=trainer[0]) }}" class="btn btn-danger btn-sm">刪除訓練員</a>
+                    </center></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+{% endblock %}

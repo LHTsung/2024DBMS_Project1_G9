@@ -54,8 +54,7 @@ def book():
             '課程編號': i[0],
             '課程名稱': i[1],
             '課程售價': i[2],
-            '課程類別': i[3],
-            'O_STATUS': i[5],  # 假設 status 是第五個欄位
+            '課程類別': i[3]
         }
         book_data.append(book)
     return book_data
@@ -266,4 +265,139 @@ def toggle_status():
     
     return redirect(url_for('manager.productManager'))
 
+@manager.route('/trainerManager', methods=['GET', 'POST'])
+@login_required
+def trainerManager():
+    if current_user.role == 'user':
+        flash('No permission')
+        return redirect(url_for('index'))
 
+    # 處理表單提交
+    if request.method == 'POST':
+        action = request.form.get('action')
+        tid = request.form.get('tid')  # 確保能夠獲取 tid
+        tname = request.form.get('tname')
+        specialty = request.form.get('specialty')
+
+        if not tid:
+            flash("訓練員ID未正確提供")
+            return redirect(url_for('manager.trainerManager'))
+
+        if action == 'add':
+            # 新增邏輯
+            input_data = {
+                'tid': tid,
+                'tname': tname,
+                'specialty': specialty
+            }
+            Trainer.add_trainer(input_data)
+            flash('訓練員已成功新增')
+
+        elif action == 'update':
+            # 更新訓練員資料
+            input_data = {
+                'tid': tid,
+                'tname': tname,
+                'specialty': specialty
+            }
+            Trainer.update_trainer(input_data)
+            flash('訓練員資料已更新')
+
+        elif action == 'delete':
+            # 刪除邏輯
+            Trainer.delete_trainer(tid)
+            flash('訓練員已刪除')
+
+        return redirect(url_for('manager.trainerManager'))
+
+    # 搜索功能：處理 GET 請求，根據 search 關鍵字過濾訓練員
+    search_query = request.args.get('search', '')
+    if search_query:
+        trainer_data = Trainer.get_trainers_by_search(search_query)
+    else:
+        trainer_data = Trainer.get_all_trainers()
+
+    return render_template('trainerManager.html', trainer_data=trainer_data, user=current_user.name)
+
+
+@manager.route('/addTrainer', methods=['GET', 'POST'])
+@login_required
+def addTrainer():
+    if current_user.role == 'user':
+        flash('No permission')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        tid = request.form['tid']
+        tname = request.form['tname']
+        specialty = request.form['specialty']
+
+        # 新增訓練員資料
+        input_data = {
+            'tid': tid,
+            'tname': tname,
+            'specialty': specialty
+        }
+        Trainer.add_trainer(input_data)
+        flash('訓練員已成功新增')
+        return redirect(url_for('manager.trainerManager'))
+
+    return render_template('addTrainer.html')
+
+
+@manager.route('/editTrainer/<tid>', methods=['GET', 'POST'])
+@login_required
+def editTrainer(tid):
+    if current_user.role == 'user':
+        flash('No permission')
+        return redirect(url_for('index'))
+
+    # 獲取訓練員資料
+    trainer = Trainer.get_trainer(tid)
+    if not trainer:
+        flash("訓練員不存在")
+        return redirect(url_for('manager.trainerManager'))
+
+    if request.method == 'POST':
+        tname = request.form['tname']
+        specialty = request.form['specialty']
+
+        # 更新訓練員資料
+        input_data = {
+            'tid': tid,
+            'tname': tname,
+            'specialty': specialty
+        }
+        Trainer.update_trainer(input_data)
+        flash('訓練員資料已更新')
+        return redirect(url_for('manager.trainerManager'))
+
+    return render_template('editTrainer.html', trainer=trainer)
+
+
+@manager.route('/deleteTrainer/<tid>', methods=['GET', 'POST'])
+@login_required
+def deleteTrainer(tid):
+    if current_user.role == 'user':
+        flash('No permission')
+        return redirect(url_for('index'))
+
+    # 獲取訓練員資料
+    trainer = Trainer.get_trainer(tid)
+    if not trainer:
+        flash("訓練員不存在")
+        return redirect(url_for('manager.trainerManager'))
+
+    if request.method == 'POST':
+        # 刪除訓練員
+        Trainer.delete_trainer(tid)
+        flash('訓練員已刪除')
+        return redirect(url_for('manager.trainerManager'))
+
+    return render_template('deleteTrainer.html', trainer=trainer)
+    
+    
+@manager.route('/dashboard', methods=['GET', 'POST'])
+@login_required  # 確保用戶已登入
+def dashboard():
+    return render_template('dashboard.html', user=current_user)
