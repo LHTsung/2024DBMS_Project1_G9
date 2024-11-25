@@ -344,9 +344,17 @@ class Trainer:
 
     @staticmethod
     def delete_trainer(tid):
-        # 刪除訓練員
-        sql = 'DELETE FROM TRAINER WHERE TID = %s'
-        DB.execute_input(sql, (tid,))
+        # 檢查 order_list 中是否有與該 trainer 相關聯的訂單
+        sql_check = 'SELECT COUNT(*) FROM order_list WHERE trainer = %s'
+        result = DB.fetchone(sql_check, (tid,))
+
+        # 如果有訂單引用該 trainer，則不允許刪除
+        if result[0] > 0:
+            raise Exception(f"無法刪除訓練員 {tid}，因為仍有相關訂單存在。")
+        
+        # 如果沒有相關訂單，則刪除該 trainer
+        sql_delete = 'DELETE FROM TRAINER WHERE TID = %s'
+        DB.execute_input(sql_delete, (tid,))
 
 
 
