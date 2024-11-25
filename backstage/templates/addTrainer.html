@@ -1,23 +1,62 @@
 {% extends "backstage.html" %}
+{% block head %}
+{{ super() }}
+{% endblock head %}
 
-{% block content %}
-<h2>新增訓練員</h2>
+{% block title %}新增訓練員{% endblock title%}
 
-<form method="POST">
-    <div class="mb-3">
-        <label for="tid" class="form-label">訓練員編號</label>
-        <input type="text" name="tid" class="form-control" placeholder="請輸入訓練員編號" required>
-    </div>
-    <div class="mb-3">
-        <label for="tname" class="form-label">名稱</label>
-        <input type="text" name="tname" class="form-control" placeholder="請輸入名稱" required>
-    </div>
-    <div class="mb-3">
-        <label for="specialty" class="form-label">專業領域</label>
-        <input type="text" name="specialty" class="form-control" placeholder="請輸入專業領域" required>
-    </div>
-    <button type="submit" name="action" value="add" class="btn btn-success">新增</button>
-    <a href="{{ url_for('manager.trainerManager') }}" class="btn btn-secondary">取消</a>
-</form>
+{% block content%}
 
-{% endblock %}
+<!-- 顯示訊息提示 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if message == 'No permission' %}
+                <script language="javascript">
+                    alert('您沒有使用者的權限喔！');
+                </script>
+            {% elif message == 'duplicate_tid' %}
+                <script language="javascript">
+                    alert('該訓練員編號已重複，請使用其他編號。');
+                </script>
+            {% elif message == 'failed_add' %}
+                <script language="javascript">
+                    alert('新增訓練員失敗，請稍後再試。');
+                </script>
+            {% elif message == 'success_add' %}
+                <script language="javascript">
+                    alert('訓練員已成功新增。');
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- 增加上方間距，避免被 banner 覆蓋 -->
+<div class="container-xl mt-4">
+    <h2>新增訓練員</h2>
+    <form method="post" action="{{ url_for('manager.addTrainer') }}">
+        <table class="table table-bordered mt-3">
+            <tr>
+                <th>訓練員編號</th>
+                <td><input class="form-control" type="text" name="tid" placeholder="請輸入訓練員編號" required></td>
+            </tr>
+            <tr>
+                <th>名稱</th>
+                <td><input class="form-control" type="text" name="tname" placeholder="請輸入名稱" required></td>
+            </tr>
+            <tr>
+                <th>專業領域</th>
+                <td><input class="form-control" type="text" name="specialty" placeholder="請輸入專業領域" required></td>
+            </tr>
+        </table>
+        <center>
+            <div class="mt-3">
+                <button class="btn btn-outline-success me-2" type="submit">確定新增</button> 
+                <a href="{{ url_for('manager.trainerManager') }}" class="btn btn-outline-danger">取消</a>
+            </div>
+        </center>
+    </form>
+</div>
+
+{% endblock content%}
