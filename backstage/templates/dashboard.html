@@ -5,6 +5,10 @@
 {% block title %}後台資料分析{% endblock title %}
 {% block content %}
 
+<div class="user-info">
+  <span>歡迎，{{ current_user.name }}!</span>  <!-- 顯示管理員名稱 -->
+</div>
+
 <div class="my-3 p-3 bg-body rounded shadow-sm">
   <!-- Dashboard -->
   <div id="dashboard">

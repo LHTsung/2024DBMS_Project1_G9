@@ -1,0 +1,23 @@
+{% extends "backstage.html" %}
+
+{% block content %}
+<h2>新增訓練員</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="tid" class="form-label">訓練員編號</label>
+        <input type="text" name="tid" class="form-control" placeholder="請輸入訓練員編號" required>
+    </div>
+    <div class="mb-3">
+        <label for="tname" class="form-label">名稱</label>
+        <input type="text" name="tname" class="form-control" placeholder="請輸入名稱" required>
+    </div>
+    <div class="mb-3">
+        <label for="specialty" class="form-label">專業領域</label>
+        <input type="text" name="specialty" class="form-control" placeholder="請輸入專業領域" required>
+    </div>
+    <button type="submit" name="action" value="add" class="btn btn-success">新增</button>
+    <a href="{{ url_for('manager.trainerManager') }}" class="btn btn-secondary">取消</a>
+</form>
+
+{% endblock %}
